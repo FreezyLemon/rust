@@ -23,9 +23,13 @@ pub struct Rustc {
 
 crate::impl_common_helpers!(Rustc);
 
-fn setup_common() -> Command {
+fn setup_bare() -> Command {
     let rustc = env::var("RUSTC").unwrap();
-    let mut cmd = Command::new(rustc);
+    Command::new(rustc)
+}
+
+fn setup_common() -> Command {
+    let mut cmd = setup_bare();
     set_host_rpath(&mut cmd);
     cmd.arg("--out-dir").arg(tmp_dir()).arg("-L").arg(tmp_dir());
     cmd
@@ -34,7 +38,14 @@ fn setup_common() -> Command {
 impl Rustc {
     // `rustc` invocation constructor methods
 
-    /// Construct a new `rustc` invocation.
+    /// Construct a new `rustc` invocation without any options.
+    pub fn new_bare() -> Self {
+        let cmd = setup_bare();
+        Self { cmd }
+    }
+
+    /// Construct a new `rustc` invocation with some basic options (setting
+    /// `--out-dir` and `-L` to a temporary directory).
     pub fn new() -> Self {
         let cmd = setup_common();
         Self { cmd }
